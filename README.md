@@ -52,11 +52,10 @@ By default, the program displays raw data without applying filters or scaling. W
 How this program works?
 ---
 
-The code is well documented and written to be easy to understand. For the diligent programmer with a Modbus specification in hand, it should be trivial to understand how the scanning engine and byte buffering logic work.
 
 The algorithms used for 32-bit decoding extract raw bytes from Modbus registers and map them in memory using `memcpy`, ensuring that the representation of floating-point numbers follows the IEEE 754 standard.
 
 Credits
 ---
 
-Modbus Swissknife was written by STEOlab during some free time and is released under the BSD three-clause license.
+Modbus Swissknife was written by STEOlab is released under the BSD three-clause license.
