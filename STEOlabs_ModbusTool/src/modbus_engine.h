@@ -4,27 +4,30 @@
 #include <Arduino.h>
 
 /**
- * STEOlab Modbus swissknife 2.0 - TOTAL DIAGNOSTIC
- * Universal Engine Header
+ * STEOlab Modbus swissknife 2.9 - Industrial Pro Edition
+ * Header basato su specifiche ufficiali Aqualabo e stile minimalista.
  */
 namespace MBEngine {
-    // Inizializza i pin RS485 e l'alimentazione del sensore
+    
+    // Inizializza i pin hardware e gestisce il warm-up del sensore.
     void init();
 
-    // Configura il baudrate della Serial2 (4800, 9600, etc.)
-    void configureUART(uint32_t baud, uint32_t config);
-
-    // Scansione "Verbose" di tutti gli ID e Baudrate
+    // Esegue una scansione rapida del bus usando la funzione Modbus 0x11 (Report Slave ID).
+    // Testa configurazioni 8N1 e 8N2 per coprire setup standard e factory default.
     void scanNetwork(uint8_t startID, uint8_t endID);
 
-    // Ispezione raw della memoria (Hex, Uint16, Int16)
+    // Ispeziona un blocco di registri. Include una protezione per non superare i 60 registri,
+    // evitando errori di indirizzamento illegale (Exception 0x02) comuni nei sensori industriali.
     void dumpRegisters(uint8_t id, uint32_t baud, uint16_t startReg, uint16_t count);
 
-    // Analisi istantanea con decodifica di TUTTE le 4 combinazioni Float e Int32
+    // Snapshot diagnostico di un registro specifico con decodifica Float IEEE 754 (Big-Endian/ABCD).
     void analyzeRegister(uint8_t id, uint32_t baud, uint16_t reg);
 
-    // Monitoraggio continuo multi-formato (per identificare Endianness e variazioni)
+    // Monitoraggio continuo (loop da 1s) per osservare la stabilizzazione dei parametri chimici.
     void watchRegister(uint8_t id, uint32_t baud, uint16_t reg);
+
+    // Pipeline automatica: scan del bus, dump iniziale, stima formato 32-bit e watch continuo.
+    void autoDiscoverAndWatch(uint8_t startID, uint8_t endID);
 }
 
 #endif

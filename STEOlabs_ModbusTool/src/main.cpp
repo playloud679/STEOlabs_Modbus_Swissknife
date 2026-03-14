@@ -13,19 +13,23 @@ void printHelp() {
     SerialMon.println("   Description: Discover active IDs across multiple baud rates.");
     SerialMon.println("   Example: scan 1 15          (Scans IDs 1 to 15)");
     
-    SerialMon.println("2. dump <id> <baud> <reg> <n>");
+    SerialMon.println("2. auto <start> <end>");
+    SerialMon.println("   Description: Scan, baseline dump, ask for stimulus, detect moving regs, then watch.");
+    SerialMon.println("   Example: auto 1 15          (Guided detection with sensor stimulation)");
+    
+    SerialMon.println("3. dump <id> <baud> <reg> <n>");
     SerialMon.println("   Description: View raw memory block (Hex/Dec).");
     SerialMon.println("   Example: dump 1 4800 0 20   (Read 20 registers from ID 1)");
     
-    SerialMon.println("3. analyze <id> <baud> <reg>");
-    SerialMon.println("   Description: Snapshot of 32-bit types (Float/Int32).");
+    SerialMon.println("4. analyze <id> <baud> <reg>");
+    SerialMon.println("   Description: Snapshot of 32-bit types with all common byte orders.");
     SerialMon.println("   Example: analyze 2 4800 4   (Check format at Reg 4)");
     
-    SerialMon.println("4. watch <id> <baud> <reg>");
+    SerialMon.println("5. watch <id> <baud> <reg>");
     SerialMon.println("   Description: Live monitoring with TX Hex and data variants.");
     SerialMon.println("   Example: watch 1 4800 1     (Monitor data at Reg 1)");
     
-    SerialMon.println("5. help");
+    SerialMon.println("6. help");
     SerialMon.println("   Description: Show this detailed guide.");
     
     SerialMon.println("\n--- REVERSE ENGINEERING TIPS ---");
@@ -37,7 +41,13 @@ void printHelp() {
 
 void setup() {
     SerialMon.begin(115200);
+    // Basic boot trace for ESP32-S3 debug
+    SerialMon.println("\n[BOOT] STEOlab Modbus swissknife starting...");
+    delay(500);
+
+    // Initialize Modbus engine (RS485 pins) now that S3 boot is stable
     MBEngine::init();
+
     SerialMon.println("\n******************************************");
     SerialMon.println("* STEOlab Modbus swissknife 1.9          *");
     SerialMon.println("* Type 'help' for full command list      *");
@@ -60,6 +70,12 @@ void processCommand(String cmd) {
         if (a1 && a2) MBEngine::scanNetwork(atoi(a1), atoi(a2));
         else MBEngine::scanNetwork(1, 10);
     } 
+    else if (strcmp(token, "auto") == 0) {
+        char* a1 = strtok(NULL, " ");
+        char* a2 = strtok(NULL, " ");
+        if (a1 && a2) MBEngine::autoDiscoverAndWatch(atoi(a1), atoi(a2));
+        else MBEngine::autoDiscoverAndWatch(1, 10);
+    }
     else if (strcmp(token, "dump") == 0) {
         char* id = strtok(NULL, " "); 
         char* baud = strtok(NULL, " ");
@@ -96,4 +112,5 @@ void loop() {
             inputBuffer += c; 
         }
     }
+
 }
